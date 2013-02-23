@@ -14,6 +14,7 @@ group :development, :test do
   gem 'guard-spork', :github => 'guard/guard-spork'
   gem 'spork', '0.9.2'
   gem 'annotate', '2.5.0'
+  gem "launchy", "~> 2.2.0"
 end
 
 
@@ -35,6 +36,8 @@ group :test do
   gem 'rb-inotify', '0.8.8'
   gem 'libnotify', '0.5.9'
   gem 'factory_girl_rails', '4.1.0'
+  gem 'cucumber-rails', '1.2.1', :require => false
+  gem 'database_cleaner', '0.7.0'
 end
 
 # To use ActiveModel has_secure_password

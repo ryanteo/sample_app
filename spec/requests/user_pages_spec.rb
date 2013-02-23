@@ -27,6 +27,10 @@ describe "UserPages" do
       it "should not create a user" do
         expect { click_button submit }.not_to change(User, :count)
       end
+      describe "should show flash error messages when submitting a blank user" do
+        before { click_button submit }
+        it { should have_content('error') }
+      end
     end
 
     describe "with valid information" do
@@ -40,16 +44,16 @@ describe "UserPages" do
       it "should create a user" do
         expect { click_button submit }.to change(User, :count).by(1)
       end
+
+      describe "after saving the user" do
+        before { click_button submit }
+        let(:user) { User.find_by_email('user@example.com')}
+
+        it { should have_selector('title', text: user.name) }
+        it { should have_selector('div.alert.alert-success', text: "Welcome")}
+        it { should have_link('Sign out')}
+      end
+
     end
   end
 end
-
-
-
-
-#  describe "GET /user_pages" do
-#    it "works! (now write some real specs)" do
-#      # Run the generator again with the --webrat flag if you want to use webrat methods/matchers
-#      get user_pages_index_path
-#      response.status.should be(200)
-#    end
