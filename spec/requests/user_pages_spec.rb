@@ -8,7 +8,7 @@ describe "UserPages" do
     let(:user) { FactoryGirl.create(:user) }
 
     before(:each) do
-      sign_in user
+      sign_in(user)
       visit users_path
     end
 
@@ -48,12 +48,10 @@ describe "UserPages" do
 
         # admin should not be able to able to delete his own account
         it { should_not have_link('delete', href: user_path(admin)) }
+        it { expect { delete user_path(admin) }.not_to change(User, :count) }
       end
     end
   end
-
-
-
 
   describe "signup page" do
     before { visit signup_path }
@@ -90,7 +88,7 @@ describe "UserPages" do
         fill_in "Name",           with: "Example User"
         fill_in "Email",          with: "user@example.com"
         fill_in "Password",       with: "foobar"
-        fill_in "Confirmation",   with: "foobar"
+        fill_in "Confirm Password",   with: "foobar"
       end
 
       it "should create a user" do
@@ -137,7 +135,7 @@ describe "UserPages" do
         fill_in "Name",           with: new_name
         fill_in "Email",          with: new_email
         fill_in "Password",       with: user.password
-        fill_in "Confirmation",   with: user.password
+        fill_in "Confirm Password",   with: user.password
         click_button "Save changes"
       end
 
@@ -148,6 +146,35 @@ describe "UserPages" do
       specify { user.reload.email.should  == new_email}
     end
 
+  end
+
+  # Signed-in users should not be able to access the #new and #create actions
+#  describe "Signed-in users should not be able to access the #new and #create actions" do
+#  let(:user) { FactoryGirl.create(:user) }
+#  before do
+#  sign_in user
+#  visit signup_path
+#  end
+#  it { should have_content('You are currently signed in and cannot create new accounts.')}
+#  end
+
+  describe "Signed-in users" do
+    let(:user) { FactoryGirl.create(:user) }
+    before { sign_in user} 
+
+    describe "should not be able to access the #new user" do
+      before { visit signup_path }
+      it { should have_content('You are currently signed in and cannot create new accounts.')}
+    end
+
+# Can't access the create action as the user has to first visit the new page, redirect already happens at the new page
+#    describe "should not access the #create action" do
+#      before do
+#        visit signup_path
+#        click_button "Create my account"
+#      end
+#      it { should have_content('You are currently signed in and cannot create new accounts.')}
+#    end
   end
 
 end

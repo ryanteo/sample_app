@@ -1,11 +1,14 @@
 class UsersController < ApplicationController
   # The user must be logged in before the user can edit or update the user's profile
   # The before filter is added for the actions index, edit, update and destroy
-  before_filter :signed_in_user,  only: [:index, :edit, :update, :destroy]
+  before_filter :signed_in_user,      only: [:index, :edit, :update, :destroy]
   # The user should be the correct user in order to edit or update the user's profile
-  before_filter :correct_user,    only: [:edit, :update]
+  before_filter :correct_user,        only: [:edit, :update]
   # Only admin users can issue destroy actions
-  before_filter :admin_user,      only: [:destroy]
+  before_filter :admin_user,          only: [:destroy]
+  # Only non-signed-in users can access the new and create actions, i.e. Signed-in users cannot access #new and #create
+  before_filter :non_signed_in_user,  only: [:new, :create] # only for the actions #new and #create, check that the user is not sign-ed in
+
   def show
     @user = User.find(params[:id])
   end
@@ -46,9 +49,14 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
-    redirect_to users_url
+    @user = User.find(params[:id]) # Find the user that is currently referenced in the request
+    if current_user?(@user) and current_user.admin? # If the current user is also the same user and an admin
+      redirect_to users_url, notice: "Admin cannot delete their own accounts."
+    else
+      User.find(params[:id]).destroy
+      flash[:success] = "User destroyed."
+      redirect_to users_url
+    end
   end
 
   private
@@ -56,6 +64,12 @@ class UsersController < ApplicationController
       unless signed_in?
         store_location
         redirect_to signin_url, notice: "Please sign in." # notice is shortcut for flash[:notice], can pass this as an options hash to redirect_to
+      end
+    end
+
+    def non_signed_in_user
+      unless not signed_in?
+        redirect_to current_user, notice: "You are currently signed in and cannot create new accounts." # notice is shortcut for flash[:notice], can pass this as an options hash to redirect_to
       end
     end
 
@@ -67,4 +81,5 @@ class UsersController < ApplicationController
     def admin_user
       redirect_to(root_path) unless current_user.admin?
     end
+
 end
