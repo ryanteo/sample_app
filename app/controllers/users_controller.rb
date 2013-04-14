@@ -11,6 +11,7 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(page: params[:page] ) # Paginate works through microposts association
   end
 
   def new
@@ -60,13 +61,6 @@ class UsersController < ApplicationController
   end
 
   private
-    def signed_in_user
-      unless signed_in?
-        store_location
-        redirect_to signin_url, notice: "Please sign in." # notice is shortcut for flash[:notice], can pass this as an options hash to redirect_to
-      end
-    end
-
     def non_signed_in_user
       unless not signed_in?
         redirect_to current_user, notice: "You are currently signed in and cannot create new accounts." # notice is shortcut for flash[:notice], can pass this as an options hash to redirect_to

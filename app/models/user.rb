@@ -13,6 +13,7 @@ class User < ActiveRecord::Base
   attr_accessible :email, :name, :password, :password_confirmation
   attr_protected  :admin
   has_secure_password
+  has_many :microposts, dependent: :destroy # associated microposts should be destroyed when the user is destroyed
 
   before_save { |user| user.email = email.downcase }
   before_save :create_remember_token
@@ -24,10 +25,12 @@ class User < ActiveRecord::Base
   validates_confirmation_of :password
   validates :password_confirmation, presence: true
 
+  def feed
+    Micropost.where("user_id = ?", id)
+  end
+
   private
     def create_remember_token
       self.remember_token = SecureRandom.urlsafe_base64   # Using self ensures that assignment sets the user’s remember_token so that it will be written to the database along with the other attributes when the user is saved.
     end
-
-
 end

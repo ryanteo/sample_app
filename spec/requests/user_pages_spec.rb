@@ -62,10 +62,21 @@ describe "UserPages" do
   describe "profile page" do
     # Code to make a user variable
     let(:user) { FactoryGirl.create(:user) }
+    # Create test microposts
+    let!(:micropost1) { FactoryGirl.create(:micropost, user: user, content: "Micropost 1 Foo") }
+    let!(:micropost2) { FactoryGirl.create(:micropost, user: user, content: "Micropost 2 Foo") }
+
     before { visit user_path(user)}
 
     it { should have_selector('h1', text: user.name) }
     it { should have_selector('title', text: user.name) }
+
+    describe "should show microposts" do
+      # it should show all the microposts and also the total number of microposts
+      it { should have_content(micropost1.content) }
+      it { should have_content(micropost2.content) }
+      it { should have_content(user.microposts.count) }
+    end
   end
 
   describe "signup" do

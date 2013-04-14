@@ -1,0 +1,8 @@
+<%= form_for(@micropost) do |f| %>
+<!-- error messages partial references the @user variable, but this is supposed to refer to the @micropost variable --><!-- for form_for(@micropost), the form variable f can access the associated object @micropost through f.object -->
+  <%= render 'shared/error_messages', object: f.object %>
+  <div class="field">
+    <%= f.text_area :content, placeholder: "Compose new micropost...." %>
+  </div>
+  <%= f.submit "Post", class: "btn btn-large btn-primary" %>
+<% end %>

@@ -8,6 +8,14 @@
       </h1>
     </section>
   </aside>
+  <div class="span8">
+    <% if @user.microposts.any? %>
+      <h3>Microposts (<%= @user.microposts.count %>)</h3>
+      <ol class="microposts">
+        <%= render @microposts %> <!-- need to create the micropost patrial in the microposts view folder -->
+      </ol>
+      <%= will_paginate @microposts %> <!-- have to explicitly declare @microposts to paginate microposts, as this is within the Users controller -->
+    <% end %>
 </div>
 
 <p><%= @user.name %>, <%= @user.email %></p>
