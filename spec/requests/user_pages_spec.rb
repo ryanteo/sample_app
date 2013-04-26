@@ -1,8 +1,9 @@
 require 'spec_helper'
 
-describe "UserPages" do
+describe "User Pages" do
   subject { page }
 
+  # Index
   # When visiting /users/, it should show a list of users (FactoryGirl to create 30 sample users)
   describe "index" do
     let(:user) { FactoryGirl.create(:user) }
@@ -53,12 +54,15 @@ describe "UserPages" do
     end
   end
 
+
+  # Signup Page #
   describe "signup page" do
     before { visit signup_path }
     it { should have_selector('h1',     text: 'Sign up') }
     it { should have_selector('title',  text: full_title('Sign up'))}
   end
 
+  # Profile Page #
   describe "profile page" do
     # Code to make a user variable
     let(:user) { FactoryGirl.create(:user) }
@@ -77,7 +81,69 @@ describe "UserPages" do
       it { should have_content(micropost2.content) }
       it { should have_content(user.microposts.count) }
     end
+
+    # test for follow/unfollow button
+    describe "follow/unfollow buttons" do
+      let(:other_user) { FactoryGirl.create(:user) }
+
+      # log in as user
+      before { sign_in user }
+
+      # Following a user
+      describe "following a user" do
+        before { visit user_path(other_user) }
+
+        # when following a user, the number of followed users should increase +1
+        it "should increase the number of user's followed users by 1" do
+          expect do
+            click_button "Follow"
+          end.to change(user.followed_users, :count).by(1)
+        end
+
+        # when following a user, the number of followers for the other_user should increase +1
+        it "should increase the number of followers of the other_user by 1" do
+          expect do
+            click_button "Follow"
+          end.to change(other_user.followers, :count).by(1)
+        end
+
+        # the follow/unfollow button should toggle
+        describe "toggling the button" do
+          before { click_button "Follow" }
+          it { should have_selector('input', value: "Unfollow") }
+        end
+      end
+
+      # Unfollowing a user
+      describe "unfollowing a user" do
+        before do
+          user.follow!(other_user)
+          visit user_path(other_user)
+        end
+
+        # when following a user, the number of followed users should increase +1
+        it "should decrease the number of user's followed users by 1" do
+          expect do
+            click_button "Unfollow"
+          end.to change(user.followed_users, :count).by(-1)
+        end
+
+        # when following a user, the number of followers for the other_user should increase +1
+        it "should decrease the number of followers of the other_user by 1" do
+          expect do
+            click_button "Unfollow"
+          end.to change(other_user.followers, :count).by(-1)
+        end
+
+        # the follow/unfollow button should toggle
+        describe "toggling the button" do
+          before { click_button "Unfollow" }
+          it { should have_selector('input', value: "Follow") }
+        end
+      end
+    end
   end
+
 
   describe "signup" do
     before { visit signup_path }
@@ -188,4 +254,34 @@ describe "UserPages" do
 #    end
   end
 
+  # Following and Followers Page #
+  describe "following/followers" do
+    let(:user) { FactoryGirl.create(:user) }
+    let(:other_user) { FactoryGirl.create(:user) }
+    before { user.follow!(other_user) } # user will follow the other_user
+
+    # For signed-in users, the pages should have the links for following and followers
+    describe "followed users" do
+      before do
+        sign_in user
+        visit following_user_path(user)
+      end
+
+      it { should have_selector('title', text: full_title('Following')) }
+      it { should have_selector('h3', text: 'Following') }
+      it { should have_link(other_user.name, href: user_path(other_user)) }
+    end
+
+    # For signed-in users, the pages should have the links for following and followers
+    describe "followers" do
+      before do
+        sign_in other_user
+        visit followers_user_path(other_user)
+      end
+
+      it { should have_selector('title', text: full_title('Followers')) }
+      it { should have_selector('h3', text: 'Followers') }
+      it { should have_link(user.name, href: user_path(user)) }
+    end
+  end
 end

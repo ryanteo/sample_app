@@ -1,12 +1,22 @@
 SampleApp::Application.routes.draw do
 #  get "users/new"
-  resources :users
-  resources :sessions,    only: [:new, :create, :destroy]
-  resources :microposts,  only: [:create, :destroy]
+  resources :users do
+    member do
+      get :following, :followers
+    end
+  end
+  # HTTP    url                   action            path
+  # GET     /users/1/following    following         following_user_path(1) 
+  # GET     /users/1/followers    followers         followers_user_path(1)            
+
+  resources :sessions,      only: [:new, :create, :destroy]
+  resources :microposts,    only: [:create, :destroy]
+  resources :relationships, only: [:create, :destroy]
+
 
   # get "static_pages/home"
   # match '/',        to: 'static_pages#home'
-  root :to => 'static_pages#home'
+  root to: 'static_pages#home'
   # get "static_pages/help"
   match '/help',    to: 'static_pages#help'
   # get "static_pages/about"

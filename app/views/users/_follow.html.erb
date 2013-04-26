@@ -1,0 +1,9 @@
+<!-- partial: follow -->
+<!-- make a new relationship -->
+<!-- sends a POST request to the Relationship model object to create a relationship -->
+<%= form_for(current_user.relationships.build(followed_id: @user.id), 
+             remote: true) do |f| %>
+  <!-- "build" linked to POST route: user/relationships -->
+  <div><%= f.hidden_field :followed_id %></div>
+  <%= f.submit "Follow", class: "btn btn-large btn-primary" %>
+<% end %>
